@@ -43,7 +43,7 @@ router.route('/:username').get((req, res) => {
 });
 
 router.route('/validate').post((req, res1) => {
-
+    console.log("aaa")
     var MongoClient = require('mongodb').MongoClient;
     var url = constants.MONGO_URL;;
 
@@ -55,9 +55,21 @@ router.route('/validate').post((req, res1) => {
         var dbo = db.db("OnlineShop");
         var query = { username: inputUsername , passive:inputPassword };
         dbo.collection("users").findOne({username: { $eq: inputUsername },password: { $eq: inputPassword }}, function(err, result) {
-            if (err) throw err;
+            if (err) {
+                throw err
+                // print("***")
+                // print(err)
+                // res.send(401, 'incorrect');
+                // print("***")
+            };
             db.close();
-            res1.send(result)
+            if (result == null){
+                res1.send(401, 'incorrect');
+            }else{
+                res1.send(result)
+            }
+
+
         });
     });
 
@@ -83,11 +95,15 @@ router.route('/').post((req, res1) => {
     MongoClient.connect(url, function(err, db) {
         if (err) throw err;
         var dbo = db.db("OnlineShop");
-        dbo.collection("users").insertOne(newUserItem, function(err, res) {
-            if (err) throw err;
-            console.log("1 document inserted");
-            db.close();
-            res1.send(true);
+        dbo.collection("users").insertOne(newUserItem, function(err2, res) {
+            if (err2){
+                console.log(err2);
+                res1.send(401, 'error');
+            }else{
+                console.log("1 document inserted");
+                db.close();
+                res1.send(true);
+            }
         });
     });
 
